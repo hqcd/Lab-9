@@ -8,13 +8,16 @@ package com.example.quinten.lab9;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.provider.CallLog;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button missed,outgoing,incoming;
     TextView textView;
+    TableLayout t;
     String[] myColumnProjection = new String[]{
             CallLog.Calls.NUMBER,
             CallLog.Calls.DATE,
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         outgoing = (Button)findViewById(R.id.outgoingButton);
         incoming = (Button)findViewById(R.id.incomingButton);
         textView = (TextView)findViewById(R.id.callTV);
+        t = (TableLayout)findViewById(R.id.callTable);
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALL_LOG}, 20 );
         contentResolver  = getContentResolver();
@@ -90,18 +95,39 @@ public class MainActivity extends AppCompatActivity {
             case R.id.incomingButton:
                 displayIncoming();
                 break;
+            case R.id.deleteButton:
+                deleteCall(v);
+                break;
         }
     }
 
+    public void deleteCall(View view)
+    {
+        //Todo
+
+    }
     public void displayMissed()
     {
+        t.removeAllViews();
         selection = "CallLog.Calls.TYPE = 3";
         Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
         if(cursor != null && cursor.getCount() > 0)
         {
             StringBuilder sb = new StringBuilder("");
+            LayoutInflater li = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            int index = 0;
             while(cursor.moveToNext())
             {
+                View row = li.inflate(R.layout.table_row_ui, null);
+                TextView t1 = (TextView)row.findViewById(R.id.callTV);
+                t1.setText(cursor.getString(0));
+                TextView t2 = (TextView)row.findViewById(R.id.dateTV);
+                t2.setText(epochToDate(cursor.getLong(1)));
+                TextView t3 = (TextView)row.findViewById(R.id.callTypeTV);
+                t3.setText(callType(cursor.getInt(2)));
+
+                t.addView(row, index);
+                index++;
                 sb.append(cursor.getString(0) + " , " + epochToDate(cursor.getLong(1))+ " , " + callType(cursor.getInt(2)) + "\n");
             }
 
