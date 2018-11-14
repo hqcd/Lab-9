@@ -10,6 +10,16 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/displayAllButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DisplayAll"
+            android:onClick="onClick"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,13 +75,24 @@
             android:layout_gravity="center_horizontal"
         android:id="@+id/callTV"/>
 
-        <TableLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/callTable">
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:id="@+id/callTable"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
 
-        </TableLayout>
+                </TableLayout>
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 
