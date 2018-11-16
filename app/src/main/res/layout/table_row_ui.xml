@@ -6,13 +6,19 @@
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:gravity="center_horizontal"
-    android:paddingBottom="10dp">
+    android:paddingBottom="10dp"
+    >
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/callID"/>
         <TextView
             android:id="@+id/phoneNumTV"
             android:layout_width="wrap_content"
@@ -27,13 +33,21 @@
             android:id="@+id/dateTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background= "@android:color/darker_gray"/>
     </LinearLayout>
 
     <Button
         android:id="@+id/deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_gravity="center"
+        android:layout_marginLeft="15dp"
         android:onClick="onClick"
         android:text="Delete" />
+
+
 </TableRow>

@@ -1,6 +1,6 @@
 /*
 * Created by Quinten Whitaker
-* Assignment: Lab 9
+* Assignment: Lab 10
 * Date: 10/28/18
 */
 
@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,8 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.lang.Long;
 
 import org.w3c.dom.Text;
@@ -40,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     String[] myColumnProjection = new String[]{
             CallLog.Calls.NUMBER,
             CallLog.Calls.DATE,
-            CallLog.Calls.TYPE
+            CallLog.Calls.TYPE,
+            CallLog.Calls._ID
     };
     EditText searchNumber;
     String where;
@@ -63,8 +67,7 @@ public class MainActivity extends AppCompatActivity {
         t = (TableLayout)findViewById(R.id.callTable);
         searchNumber = (EditText)findViewById(R.id.searchBarET);
 
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALL_LOG}, 20 );
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALL_LOG}, 20 );
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.WRITE_CALL_LOG}, 20 );
 
         contentResolver  = getContentResolver();
 
@@ -123,24 +126,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void deleteCall(View view)
     {
-        //Todo
+
         TableRow row = (TableRow)view.getParent();
 
-        TextView t2 = (TextView)row.findViewById(R.id.dateTV);
-        Date date = format.parse(t2.getText().toString(), new ParsePosition(0));
-        long time = date.getTime();
-        String timeString = Long.toString(time);
+        TextView id = row.findViewById(R.id.callID);
+        String _id = id.getText().toString();
+        _id = _id.substring(4);
 
-        where = CallLog.Calls.DATE+ " = " + timeString;
+        final String where = "_ID = " + _id;
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Call");
         builder.setMessage("Are you sure you want to delete this call from your history?");
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 contentResolver.delete(CallLog.Calls.CONTENT_URI, where, null);
+                Toast.makeText(getApplicationContext(), "Call Deleted", Toast.LENGTH_SHORT).show();
                 displayAll();
+
             }
         });
 
@@ -152,20 +156,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void displaySearch()
     {
-        selection = "CallLog.Calls.NUMBER = "+ searchNumber.getText().toString();
-        Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
-        updateDisplay(cursor);
+        if(searchNumber.getText().toString().length() > 0)
+        {
+            selection = "NUMBER = "+ searchNumber.getText().toString();
+            Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
+            updateDisplay(cursor);
+        }
+
     }
     public void displayMissed()
     {
-        selection = "CallLog.Calls.TYPE = 3";
+        selection = "TYPE = " + CallLog.Calls.MISSED_TYPE;
         Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
         updateDisplay(cursor);
+
     }
     public void displayAll()
     {
         Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, null, null, CallLog.Calls.DATE);
         updateDisplay(cursor);
+
     }
     public void updateDisplay(Cursor cursor)
     {
@@ -179,12 +189,16 @@ public class MainActivity extends AppCompatActivity {
             {
                 View row = li.inflate(R.layout.table_row_ui, null);
                 TextView t1 = (TextView)row.findViewById(R.id.phoneNumTV);
-                t1.setText(cursor.getString(0));
+                t1.setText("Number: " + cursor.getString(cursor.getColumnIndex("NUMBER")));
                 TextView t2 = (TextView)row.findViewById(R.id.dateTV);
-                t2.setText(epochToDate(cursor.getLong(1)));
+                t2.setText("Date: " + epochToDate(cursor.getLong(cursor.getColumnIndex("DATE"))));
                 TextView t3 = (TextView)row.findViewById(R.id.callTypeTV);
-                t3.setText(callType(cursor.getInt(2)));
+                t3.setText("Type: " + callType(cursor.getInt(cursor.getColumnIndex("TYPE"))));
+                TextView t4 = (TextView)row.findViewById(R.id.callID);
+                t4.setText("ID: " + cursor.getString(cursor.getColumnIndex("_ID")));
+
                 Button btn = (Button)row.findViewById(R.id.deleteButton);
+
 
                 t.addView(row, index);
                 index++;
@@ -195,17 +209,21 @@ public class MainActivity extends AppCompatActivity {
         {
             textView.setText("No Calls");
         }
+
+
     }
     public void displayOutgoing()
     {
-        selection = "CallLog.Calls.TYPE = 2";
+        selection = "TYPE = " + CallLog.Calls.OUTGOING_TYPE;
         Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
         updateDisplay(cursor);
+
     }
     public void displayIncoming()
     {
-        selection = "CallLog.Calls.TYPE = 1";
+        selection = "TYPE = " + CallLog.Calls.INCOMING_TYPE;
         Cursor cursor = contentResolver.query(CallLog.Calls.CONTENT_URI, myColumnProjection, selection, null, CallLog.Calls.DATE);
         updateDisplay(cursor);
+
     }
 }
